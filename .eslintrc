@@ -1,0 +1,6 @@
+{
+    "extends": "rallycoding"
+}
+
+# 'project directory' npm install --save-dev eslint-config-rallycoding
+# installs as a developer dependancy
