@@ -10,6 +10,12 @@ const SCREEN_WIDTH = Dimensions.get('window').width;
 const SWIPE_THRESHOLD = 0.25 * SCREEN_WIDTH;
 
 class Deck extends Component {
+  // Reserved by react
+  static defaultProps = {
+      onSwipeRight: () => {},
+      onSwipeLeft: () => {}
+  }
+
   componentWillMount() {
     this.position = new Animated.ValueXY();
     // Never updated with setState() could have:
@@ -30,16 +36,26 @@ class Deck extends Component {
         }
       }
     });
+
+    this.state = { index: 0 };
   }
 
   forceSwipe(direction) {
     const x = 1.5 * (direction === 'right' ? SCREEN_WIDTH : -SCREEN_WIDTH);
-
-
     Animated.timing(this.position, {
       toValue: { x, y: 0 },
       duration: 250
-    }).start();
+    }).start(() => this.onSwipeComplete(direction));
+  }
+
+  onSwipeComplete(direction) {
+    const { onSwipeLeft, onSwipeRight, data } = this.props;
+    const item = data[this.state.index];
+
+    direction === 'right' ? onSwipeRight(item) : onSwipeLeft(item);
+    this.position.setValue({ x: 0, y: 0 });
+    // Check for potential flicker glitch position is currently applied to top card.
+    this.setState({ index: this.state.index + 1 });
   }
 
   resetPosition() {
@@ -62,8 +78,9 @@ class Deck extends Component {
   }
 
   renderCards() {
-    return this.props.data.map((item, index) => {
-      if (index === 0) {
+    return this.props.data.map((item, i) => {
+      if (i < this.state.index) { return null; }
+      if (i === this.state.index) {
         return (
           <Animated.View
             key={item.id}
