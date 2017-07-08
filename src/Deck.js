@@ -20,13 +20,27 @@ class Deck extends Component {
     });
   }
 
+  getCardStyle() {
+    const { pos } = this.position;
+    console.log(pos);
+    const rotate = this.position.x.interpolate({
+      inputRange: [-500, 0, 500],
+      outputRange: ['-120deg', '0deg', '120deg']
+    });
+
+    return {
+      ...this.position.getLayout(),
+      transform: [{ rotate }]
+    };
+  }
+
   renderCards() {
     return this.props.data.map((item, index) => {
       if (index === 0) {
         return (
           <Animated.View
             key={item.id}
-            style={this.position.getLayout()}
+            style={this.getCardStyle()}
             {...this.panResponder.panHandlers}
           >
             {this.props.renderCard(item)}
